@@ -5,10 +5,10 @@
 // @namespace    https://screeps.com/
 // @version      0.0.1
 // @author       U-238
+// @include      https://screeps.com/a/
 // @description  try to take over the world!
-// @match        https://screeps.com/a/
 // @run-at       document-ready
-// @grant        none
+// @downloadUrl  https://raw.githubusercontent.com/NesCafe62/screeps-rts-controls/refs/heads/main/rts-controls.js
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
 // @require      https://github.com/Esryok/screeps-browser-ext/raw/master/screeps-browser-core.js
 // ==/UserScript==
