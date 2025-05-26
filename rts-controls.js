@@ -42,7 +42,7 @@ function init() {
     getMyUserId();
 
     let content = "\
-        <md:button\
+        <md:button \
             class='md-fab md-button rts-controls' \
             ng-transclude ng:class=\"{'md-primary': Room.selectedAction.action == 'rts-controls'}\" \
             ng:click=\"Room.selectedAction = {action: 'rts-controls'}\" \
@@ -55,7 +55,7 @@ function init() {
     $('.room-controls-content').append(buttonEl);
 
     DomHelper.addStyle("\
-        .rts-selection-box { position: absolute; pointer-events: none; border-radius: 5px; background-color: RGBA(0, 88, 255, 0.1); outline: rgba(0, 159, 255, 0.45) solid 2px; }\
+        .rts-selection-box { position: absolute; pointer-events: none; border-radius: 5px; background-color: RGBA(0, 88, 255, 0.1); outline: rgba(0, 159, 255, 0.45) solid 2px; } \
     ");
 
     selectionBoxEl = $('<div class="rts-selection-box" style="display: mone;"></div>')[0];
