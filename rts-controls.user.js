@@ -225,7 +225,7 @@ function handleMouseUp(event) {
     let toY = (fromY + Math.abs(cursorPos.y - startY));
     for (let obj of $scope.Room.objects) {
         if (
-            obj.type === 'creep' &&
+            obj.type === 'creep' && !obj.spawning &&
             inSelection(obj, fromX, fromY, toX, toY) &&
             obj.user === myUserId
         ) {
