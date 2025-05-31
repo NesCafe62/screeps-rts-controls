@@ -35,5 +35,7 @@ Currently supported commands:
 - RMB: `"smartOrder"`
 - Hold key `A` + RMB: `"smartAttack"`
 - Hold key `M` + RMB: `"smartMove"`
+- Hold key `R` + RMB: `"repair"`
+- Hold key `T` + RMB: `"transfer"`
 - Key `S`: `"stop"`
 - Key `D`: `"drop"`
