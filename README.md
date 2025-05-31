@@ -32,8 +32,8 @@ global.RTS = new RTSControls();
 ```
 
 Currently supported commands:
-RMB: `"smartOrder"`
-Hold key `A` + RMB: `"smartAttack"`
-Hold key `M` + RMB: `"smartMove"`
-Key `S`: `"stop"`
-Key `D`: `"drop"`
+- RMB: `"smartOrder"`
+- Hold key `A` + RMB: `"smartAttack"`
+- Hold key `M` + RMB: `"smartMove"`
+- Key `S`: `"stop"`
+- Key `D`: `"drop"`
