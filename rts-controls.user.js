@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         Screeps RTS controls
 // @namespace    https://screeps.com/
-// @version      0.0.3
+// @version      0.0.4
 // @author       U-238
 // @include      https://screeps.com/a/
 // @run-at       document-ready
@@ -96,38 +96,32 @@ function createTarget(pos, roomObjects) {
     let target = {type: 'pos', pos};
     for (let obj of roomObjects) {
         if (obj.x === pos.x && obj.y === pos.y) {
-            count++;
             let type = obj.type;
+            if ((type === 'tombstone' || type === 'ruin') && Object.keys(obj.store).length === 0) {
+                // skip empty tombstones and ruins
+                continue;
+            }
+            count++;
             if (type === 'creep') {
                 type = (obj.user === myUserId) ? 'myCreep' : 'hostileCreep';
+            } else if (type === 'powerCreep') {
+                type = (obj.user === myUserId) ? 'myPowerCreep' : 'hostilePowerCreep';
             }
-            if (type === 'structure') {
-                type = 'structures';
-            }
-            if (count > 1 || type === 'structures') {
+            if (count > 1) {
                 target.type = 'objects';
                 target.id = undefined;
-                target.name = undefined;
             } else {
                 target.type = type;
-                if (obj._id) {
+                if (type !== 'flag') {
                     target.id = obj._id;
-                } else {
-                    target.name = obj.name;
                 }
             }
-            if (type === 'structures') {
-                if (!target.structures) {
-                    target.structures = [];
-                }
-                target.structures.push(obj._id);
-            } else {
-                target[type] = obj._id || obj.name;
-            }
+            target[type] = (type === 'flag') ? obj.name : obj._id;
         }
     }
     if (count === 1) {
-        target[target.type] = undefined;
+        // target[target.type] = undefined;
+        target.id = undefined;
     }
     return target;
 }
@@ -154,12 +148,27 @@ function getCursorPos(event) {
 let holdKeys = {
     a: false,
     m: false,
+    t: false,
+    r: false,
 };
 function handleKeyDown(event) {
     if (!$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
         return;
     }
-    if (['a', 'm'].includes(event.key)) {
+    if (selectedIds.length > 0) {
+        let action;
+        if (event.key === 'd') {
+            action = 'drop';
+        }
+        if (event.key === 's') {
+            action = 'stop';
+        }
+        if (action) {
+            sendConsoleCommand('RTS.command("' + action + '",' + JSON.stringify(selectedIds) + ')', $scope);
+            return;
+        }
+    }
+    if (['a', 'm', 't', 'r'].includes(event.key)) {
         holdKeys[event.key] = true;
     }
 }
@@ -168,7 +177,7 @@ function handleKeyUp(event) {
     if (!$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
         return;
     }
-    if (['a', 'm'].includes(event.key)) {
+    if (['a', 'm', 't', 'r'].includes(event.key)) {
         holdKeys[event.key] = false;
     }
 }
@@ -300,10 +309,16 @@ function handleContextMenu(event) {
     let markerColor = '#00ac00';
     let orderType = 'smartOrder';
     if (holdKeys.a) {
-        orderType = 'attack';
+        orderType = 'smartAttack';
         markerColor = 'red';
     } else if (holdKeys.m) {
-        orderType = 'move';
+        orderType = 'smartMove';
+        markerColor = '#3333ff';
+    } else if (holdKeys.t) {
+        orderType = 'transfer';
+        markerColor = '#ff8f00';
+    } else if (holdKeys.r) {
+        orderType = 'repair';
         markerColor = '#ff8f00';
     }
 
@@ -327,7 +342,7 @@ function handleContextMenu(event) {
         x: cursorPos.x,
         y: cursorPos.y,
         roomName: $scope.Room.roomName
-    }, $scope.Room.objects);
+    }, $scope.Room.objects.concat($scope.Room.flags));
     sendConsoleCommand('RTS.command("' + orderType +'",' + JSON.stringify(selectedIds) + ',' + JSON.stringify(target) + ')', $scope);
 }
 
