@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         Screeps RTS controls
 // @namespace    https://screeps.com/
-// @version      0.0.4
+// @version      0.0.5
 // @author       U-238
 // @include      https://screeps.com/a/
 // @run-at       document-ready
@@ -150,6 +150,8 @@ let holdKeys = {
     m: false,
     t: false,
     r: false,
+    p: false,
+    g: false,
 };
 function handleKeyDown(event) {
     if (!$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
@@ -168,7 +170,7 @@ function handleKeyDown(event) {
             return;
         }
     }
-    if (['a', 'm', 't', 'r'].includes(event.key)) {
+    if (['a', 'm', 't', 'r', 'p', 'g'].includes(event.key)) {
         holdKeys[event.key] = true;
     }
 }
@@ -177,7 +179,7 @@ function handleKeyUp(event) {
     if (!$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
         return;
     }
-    if (['a', 'm', 't', 'r'].includes(event.key)) {
+    if (['a', 'm', 't', 'r', 'p', 'g'].includes(event.key)) {
         holdKeys[event.key] = false;
     }
 }
@@ -319,6 +321,12 @@ function handleContextMenu(event) {
         markerColor = '#ff8f00';
     } else if (holdKeys.r) {
         orderType = 'repair';
+        markerColor = '#ff8f00';
+    } else if (holdKeys.p) {
+        orderType = 'patrol';
+        markerColor = '#3333ff';
+    } else if (holdKeys.g) {
+        orderType = 'guard';
         markerColor = '#ff8f00';
     }
 
