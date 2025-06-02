@@ -37,5 +37,7 @@ Currently supported commands:
 - Hold key `M` + RMB: `"smartMove"`
 - Hold key `R` + RMB: `"repair"`
 - Hold key `T` + RMB: `"transfer"`
+- Hold key `P` + RMB: `"patrol"`
+- Hold key `G` + RMB: `"guard"`
 - Key `S`: `"stop"`
 - Key `D`: `"drop"`
