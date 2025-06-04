@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         Screeps RTS controls
 // @namespace    https://screeps.com/
-// @version      0.0.5
+// @version      0.0.6
 // @author       U-238
 // @include      https://screeps.com/a/
 // @run-at       document-ready
@@ -145,47 +145,37 @@ function getCursorPos(event) {
     return { x: clamp(x, 0, 49), y: clamp(y, 0, 49) };
 }
 
-let holdKeys = {
-    a: false,
-    m: false,
-    t: false,
-    r: false,
-    p: false,
-    g: false,
-};
+let holdKey = null;
+let currentAction = null;
 function handleKeyDown(event) {
-    if (!$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
+    if (!config || !$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
         return;
     }
-    if (selectedIds.length > 0) {
-        let action;
-        if (event.key === 'd') {
-            action = 'drop';
-        }
-        if (event.key === 's') {
-            action = 'stop';
-        }
-        if (action) {
-            sendConsoleCommand('RTS.command("' + action + '",' + JSON.stringify(selectedIds) + ')', $scope);
-            return;
-        }
+    let keyData = keysConfig[event.key + (event.shiftKey ? ':s' : '') + (event.ctrlKey ? ':c' : '')];
+    if (!keyData) {
+        return;
     }
-    if (['a', 'm', 't', 'r', 'p', 'g'].includes(event.key)) {
-        holdKeys[event.key] = true;
+    if (keyData.rmb) {
+        holdKey = event.key;
+        currentAction = keyData.action;
+    } else if (selectedIds.length > 0) {
+        sendConsoleCommand('RTS.command("' + keyData.action + '",' + JSON.stringify(selectedIds) + ')', $scope);
     }
 }
 
 function handleKeyUp(event) {
-    if (!$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
+    if (!config || !$scope || $scope.Room.selectedAction.action !== 'rts-controls') {
         return;
     }
-    if (['a', 'm', 't', 'r', 'p', 'g'].includes(event.key)) {
-        holdKeys[event.key] = false;
+    if (holdKey === event.key) {
+        holdKey = null;
+        currentAction = null;
     }
 }
 
 function handleMouseDown(event) {
     if (
+        !config ||
         $scope.Room.selectedAction.action !== 'rts-controls' ||
         !event.target.classList.contains('cursor-layer') ||
         event.button !== MOUSE_BUTTON_LEFT
@@ -308,28 +298,12 @@ function handleContextMenu(event) {
     }
     event.preventDefault();
 
-    let markerColor = '#00ac00';
-    let orderType = 'smartOrder';
-    if (holdKeys.a) {
-        orderType = 'smartAttack';
-        markerColor = 'red';
-    } else if (holdKeys.m) {
-        orderType = 'smartMove';
-        markerColor = '#3333ff';
-    } else if (holdKeys.t) {
-        orderType = 'transfer';
-        markerColor = '#ff8f00';
-    } else if (holdKeys.r) {
-        orderType = 'repair';
-        markerColor = '#ff8f00';
-    } else if (holdKeys.p) {
-        orderType = 'patrol';
-        markerColor = '#3333ff';
-    } else if (holdKeys.g) {
-        orderType = 'guard';
-        markerColor = '#ff8f00';
+    let keyData = keysConfig[holdKey] || keysConfig[':rmb'];
+    if (!keyData) {
+        return;
     }
 
+    let markerColor = keyData.color || defaultMarkerColor;
     targetMarkerEl.style.left = (cursorPos.x * 2) + '%';
     targetMarkerEl.style.top = (cursorPos.y * 2) + '%';
     targetMarkerEl.style.setProperty('--color', markerColor);
@@ -351,7 +325,7 @@ function handleContextMenu(event) {
         y: cursorPos.y,
         roomName: $scope.Room.roomName
     }, $scope.Room.objects.concat($scope.Room.flags));
-    sendConsoleCommand('RTS.command("' + orderType +'",' + JSON.stringify(selectedIds) + ',' + JSON.stringify(target) + ')', $scope);
+    sendConsoleCommand('RTS.command("' + keyData.action +'",' + JSON.stringify(selectedIds) + ',' + JSON.stringify(target) + ')', $scope);
 }
 
 const MOUSE_BUTTON_LEFT = 0;
@@ -385,11 +359,87 @@ function updateButton() {
     $('.room-controls-content').append(rtsControlsButtonEl);
 }
 
+let defaultMarkerColor = '#00ac00';
+let defaultConfig = {
+    'RMB': ['smartOrder', '#00ac00'],
+    'RMB+A': ['smartAttack', 'red'],
+    'RMB+M': ['smartMove', '#3333ff'],
+    'RMB+T': ['transfer', '#ff8f00'],
+    'RMB+R': ['repair', '#ff8f00'],
+    'RMB+P': ['patrol', '#3333ff'],
+    'RMB+G': ['guard', '#ff8f00'],
+    'C': 'finishControl',
+    'S': 'stop',
+    'D': 'drop',
+};
+let config;
+let keysConfig = {};
+
+function applyConfig(config) {
+    keysConfig = {};
+    for (let keyStroke in config) {
+        let action = config[keyStroke];
+        let color;
+        if (typeof action !== 'string') {
+            [action, color] = action;
+        }
+        let keys = keyStroke.toLowerCase().split('+').map(s => s.trim());
+        let _key;
+        let rmb = false;
+        let shift = false;
+        let ctrl = false;
+        for (let key of keys) {
+            if (key === 'rmb') {
+                rmb = true;
+            } else if (key === 'shift') {
+                shift = true;
+            } else if (key === 'ctrl') {
+                ctrl = true;
+            } else if (!_key) {
+                _key = key;
+            }
+        }
+        if (!_key && rmb) {
+            _key = ':rmb';
+        }
+        if (!_key) {
+            console.error(`Wrong keystroke ${keyStroke} for action ${action}`);
+            continue;
+        }
+        _key += (shift ? ':s' : '') + (ctrl ? ':c' : '');
+        if (keysConfig[_key]) {
+            console.error(`Key ${keyStroke} was already used, will be overwritten`);
+        }
+        keysConfig[_key] = { action, rmb, color };
+    }
+}
+
+function initConfig() {
+    if (config) {
+        return;
+    }
+    try {
+        config = JSON.parse(localStorage.getItem('RTS_config') || 'null');
+    } catch (e) {
+        console.error('Failed to parse RTS config from localStorage: ' + e.message);
+    }
+    ScreepsAdapter.Connection.getMemoryByPath(null, 'RTS').then( value => {
+        if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+            config = value;
+            localStorage.setItem('RTS_config', JSON.stringify(value));
+        } else {
+            config = defaultConfig;
+        }
+        applyConfig(config);
+    });
+}
+
 let tickDuration = 0;
 let prevTime = 0;
 let prevTick = 0;
 function update() {
     updateButton();
+    initConfig();
 
     let roomEl = document.querySelector('.room');
     $scope = angular.element(roomEl).scope();
