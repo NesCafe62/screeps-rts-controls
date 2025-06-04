@@ -41,3 +41,27 @@ Currently supported commands:
 - Hold key `G` + RMB: `"guard"`
 - Key `S`: `"stop"`
 - Key `D`: `"drop"`
+
+## Config
+Keystrokes are customizable from `Memory`.
+
+Set your custom config with keystrokes, orders and marker colors to `Memory.RTS_config`.
+
+Use format: `<keyStroke>: <orderType>` or `<keyStroke>: [<orderType>, <color>]`
+
+Keystroke support one keyboard letter with oprional `RMB`, `Shift` and `Ctrl` (separated by `+`), but keep in mind `Shift` will be reserved for queueing orders.
+
+```js
+Memory.RTS_config = {
+    'RMB': ['smartOrder', '#00ac00'],
+    'RMB+A': ['smartAttack', 'red'],
+    'RMB+M': ['smartMove', '#3333ff'],
+    'RMB+T': ['transfer', '#ff8f00'],
+    'RMB+R': ['repair', '#ff8f00'],
+    'RMB+P': ['patrol', '#3333ff'],
+    'RMB+G': ['guard', '#ff8f00'],
+    'C': 'finishControl',
+    'S': 'stop',
+    'D': 'drop',
+};
+```
