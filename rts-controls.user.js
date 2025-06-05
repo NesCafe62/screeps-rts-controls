@@ -34,11 +34,12 @@ function compileElement(content, parent, scope) {
     return $compile(content)($scope);
 }
 
+let _myUserId;
 function getMyUserId() {
-    if (!myUserId) {
-        myUserId = ScreepsAdapter.User._id;
+    if (!_myUserId) {
+        _myUserId = ScreepsAdapter.User._id;
     }
-    return myUserId;
+    return _myUserId;
 }
 
 function init() {
