@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         Screeps RTS controls
 // @namespace    https://screeps.com/
-// @version      0.0.6
+// @version      0.0.7
 // @author       U-238
 // @include      https://screeps.com/a/
 // @run-at       document-ready
@@ -12,14 +12,17 @@
 // @require      https://github.com/Esryok/screeps-browser-ext/raw/master/screeps-browser-core.js
 // ==/UserScript==
 
-function waitForElement(selector, fn, interval = 100) {
+function waitFor(validateFn, fn, interval = 100) {
+    if (validateFn()) {
+        fn();
+        return;
+    }
     let timeout = setInterval(() => {
-        let el = document.querySelector(selector);
-        if (!el) {
+        if (!validateFn()) {
             return;
         }
         clearInterval(timeout);
-        fn(el);
+        fn();
     }, interval);
     return timeout;
 }
@@ -39,7 +42,6 @@ function getMyUserId() {
 }
 
 function init() {
-    getMyUserId();
     // document.body.rtsLogs.push('init');
 
     document.addEventListener('keydown', handleKeyDown);
@@ -479,11 +481,14 @@ $(document).ready(() => {
     init();
     let timeout;
     // document.body.rtsLogs.push('domReady');
-    ScreepsAdapter.onRoomChange( roomName => {
-        if (timeout) {
-            clearInterval(timeout);
-        }
-        // document.body.rtsLogs.push('onRoomChange');
-        timeout = waitForElement('.room-controls-content', update);
+
+    waitFor(() => angular.element(document.body).injector(), () => {
+        ScreepsAdapter.onRoomChange( roomName => {
+            if (timeout) {
+                clearInterval(timeout);
+            }
+            // document.body.rtsLogs.push('onRoomChange');
+            timeout = waitFor(() => document.querySelector('.room-controls-content'), update);
+        });
     });
 });
