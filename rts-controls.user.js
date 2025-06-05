@@ -67,7 +67,8 @@ function init() {
 }
 
 function inSelection(obj, fromX, fromY, toX, toY) {
-    let {x, y} = obj;
+    let x = obj.x;
+    let y = obj.y;
     return (
         x >= fromX && y >= fromY &&
         x <= toX && y <= toY
@@ -95,6 +96,7 @@ function setCursorVisible(visible) {
 
 function createTarget(pos, roomObjects) {
     let count = 0;
+    let myUserId = getMyUserId();
     let target = {type: 'pos', pos};
     for (let obj of roomObjects) {
         if (obj.x === pos.x && obj.y === pos.y) {
@@ -217,6 +219,7 @@ function handleMouseUp(event) {
     if (!selecting) {
         return;
     }
+    let myUserId = getMyUserId();
     selecting = false;
     setCursorVisible(true);
     selectionBoxEl.style.display = 'none';
@@ -338,7 +341,6 @@ let selectionBoxEl, targetMarkerEl;
 let rtsControlsButtonEl;
 let $scope;
 let selecting = false;
-let myUserId;
 let selectedIds = [];
 let startX, startY;
 
