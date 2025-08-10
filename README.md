@@ -52,7 +52,7 @@ Use format: `<keyStroke>: <orderType>` or `<keyStroke>: [<orderType>, <color>]`
 Keystroke support one keyboard letter with oprional `RMB`, `Shift` and `Ctrl` (separated by `+`), but keep in mind `Shift` will be reserved for queueing orders.
 
 ```js
-Memory.RTS_config = {
+Memory.RTS = {
     'RMB': ['smartOrder', '#00ac00'],
     'RMB+A': ['smartAttack', 'red'],
     'RMB+M': ['smartMove', '#3333ff'],
